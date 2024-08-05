@@ -4,6 +4,7 @@ import dev.serrodcal.entities.Customer;
 import dev.serrodcal.entities.Order;
 import dev.serrodcal.repositories.CustomerRepository;
 import dev.serrodcal.repositories.OrderRepository;
+import dev.serrodcal.services.OrderService;
 import io.quarkus.panache.common.Parameters;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.SessionScoped;
@@ -26,44 +27,33 @@ public class OrderResource {
     private static final Logger log = Logger.getLogger(OrderResource.class.getName());
 
     @Inject
-    OrderRepository orderRepository;
-
-    @Inject
-    CustomerRepository customerRepository;
+    OrderService orderService;
 
     @GET
     @Timeout(250)
-    @SessionScoped
     public List<Order> getAllOrders() {
         log.info("OrderResource.getAllOrders()");
 
-        return orderRepository.listAll();
+        return this.orderService.getAll();
     }
 
     @GET
     @Path("/{id}")
     @Timeout(250)
-    @SessionScoped
     public Order getOrderById(@PathParam("id") Long id) {
         log.info("OrderResource.getOrderById()");
 
-        return orderRepository.findById(id);
+        return this.orderService.getById(id);
     }
 
     @PUT
     @Path("/{id}")
     @Timeout(250)
-    @Transactional
     public void updateOrder(@PathParam("id") Long id, @Valid Order order) {
         log.info("OrderResource.updateOrder()");
         log.debug(order.toString());
 
-        this.orderRepository.update(
-                "product = :product, quantity = :quantity where id = :id",
-                Parameters.with("product", order.product)
-                        .and("quantity", order.quantity)
-                        .and("id", id)
-        );
+        this.orderService.update(id, order);
     }
 
 }

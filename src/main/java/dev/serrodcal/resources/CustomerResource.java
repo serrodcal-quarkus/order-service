@@ -4,6 +4,7 @@ import dev.serrodcal.entities.Customer;
 import dev.serrodcal.entities.Order;
 import dev.serrodcal.repositories.CustomerRepository;
 import dev.serrodcal.repositories.OrderRepository;
+import dev.serrodcal.services.CustomerService;
 import io.quarkus.panache.common.Parameters;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.SessionScoped;
@@ -27,96 +28,75 @@ public class CustomerResource {
     private static final Logger log = Logger.getLogger(CustomerResource.class.getName());
 
     @Inject
-    CustomerRepository customerRepository;
-
-    @Inject
-    OrderRepository orderRepository;
+    CustomerService customerService;
 
     @GET
     @Timeout(250)
-    @SessionScoped
     public List<Customer> getAllCustomers() {
         log.info("CustomerResource.getAllCustomers()");
 
-        return this.customerRepository.listAll();
+        return this.customerService.getAll();
     }
 
     @GET
     @Path("/{id}")
     @Timeout
-    @SessionScoped
     public Customer getCustomerById(@PathParam("id") Long id) {
         log.info("CustomerResource.getCustomerById()");
 
-        return customerRepository.findById(id);
+        return customerService.getById(id);
     }
 
     @POST
     @ResponseStatus(201)
     @Timeout(250)
-    @Transactional
     public Customer createCustomer(Customer customer) {
         log.info("CustomerResource.createCustomer()");
         log.debug(customer.toString());
 
-        this.customerRepository.persistAndFlush(customer);
-        return this.customerRepository.findById(customer.id);
+        this.customerService.save(customer);
+        return this.customerService.getById(customer.id);
     }
 
     @PUT
     @Path("/{id}")
     @Timeout(250)
-    @Transactional
     public void updateCustomer(@PathParam("id") Long id, Customer customer) {
         log.info("CustomerResource.updateCustomer()");
         log.debug(customer.toString());
 
-        this.customerRepository.update(
-                "name = :name, email = :email where id = :id",
-                Parameters.with("name", customer.name)
-                        .and("email", customer.email)
-                        .and("id", id)
-        );
+        this.customerService.update(id, customer);
     }
 
     @DELETE
     @Path("/{id}")
     @ResponseStatus(204)
     @Timeout(250)
-    @Transactional
     public void deleteCustomer(@PathParam("id") Long id) {
         log.info("CustomerResource.deleteCustomer()");
 
-        this.customerRepository.deleteById(id);
+        this.customerService.deleteById(id);
     }
 
     @POST
     @Path("/{customerId}/orders")
     @ResponseStatus(201)
     @Timeout(250)
-    @Transactional
     public void addOrder(@PathParam("customerId") Long customerId, @Valid Order order) {
         log.info("CustomerResource.addOrder()");
         log.debug(order.toString());
 
-        Customer customer = this.customerRepository.findById(customerId);
-
-        orderRepository.persistAndFlush(order);
-
-        customer.orders.add(order);
+        this.customerService.addOrder(customerId, order);
     }
 
     @DELETE
     @Path("/{customerId}/orders/{orderId}")
     @ResponseStatus(204)
     @Timeout(250)
-    @Transactional
     public void deleteOrder(@PathParam("customerId") Long customerId, @PathParam("orderId") Long orderId) {
         log.info("CustomerResource.deleteOrder()");
 
-        Customer customer = this.customerRepository.findById(customerId);
-        Order order = customer.orders.stream().filter(i -> i.id == orderId).findAny().get();
-        customer.orders.remove(order);
+        this.customerService.deleteOrder(customerId, orderId);
     }
 
 }
