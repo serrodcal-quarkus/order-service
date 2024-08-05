@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity(name = "customers")
@@ -29,7 +30,7 @@ public class Customer extends PanacheEntityBase {
     public String email;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    public List<Order> orders;
+    public List<Order> orders = new ArrayList<>();
 
     @Embedded
     public Metadata metadata;

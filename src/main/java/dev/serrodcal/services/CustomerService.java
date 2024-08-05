@@ -3,6 +3,10 @@ package dev.serrodcal.services;
 import dev.serrodcal.entities.Customer;
 import dev.serrodcal.entities.Order;
 import dev.serrodcal.repositories.CustomerRepository;
+import dev.serrodcal.services.dtos.CustomerDTO;
+import dev.serrodcal.services.dtos.NewCustomerCommand;
+import dev.serrodcal.services.dtos.OrderDTO;
+import dev.serrodcal.services.dtos.UpdateCustomerCommand;
 import io.quarkus.panache.common.Parameters;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.SessionScoped;
@@ -11,6 +15,7 @@ import jakarta.transaction.Transactional;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 
 import java.util.List;
+import java.util.Objects;
 
 @ApplicationScoped
 public class CustomerService {
@@ -23,29 +28,61 @@ public class CustomerService {
 
     @CircuitBreaker(requestVolumeThreshold = 4)
     @SessionScoped
-    public List<Customer> getAll() {
-        return this.customerRepository.listAll();
+    public List<CustomerDTO> getAll() {
+        List<CustomerDTO> customers = this.customerRepository.listAll().stream()
+                .map(i -> new CustomerDTO(
+                        i.id,
+                        i.name,
+                        i.email,
+                        i.orders.stream().map(j -> new OrderDTO(j.id, j.product, j.quantity, j.metadata.createdAt, j.metadata.updatedAt)).toList(),
+                        i.metadata.createdAt,
+                        i.metadata.updatedAt
+                ))
+                .toList();
+        return customers;
     }
 
     @CircuitBreaker(requestVolumeThreshold = 4)
     @SessionScoped
-    public Customer getById(Long id) {
-        return customerRepository.findById(id);
+    public CustomerDTO getById(Long id) {
+        Customer customer = customerRepository.findById(id);
+        return new CustomerDTO(
+                customer.id,
+                customer.name,
+                customer.name,
+                customer.orders.stream().map(i -> new OrderDTO(i.id, i.product, i.quantity, i.metadata.createdAt, i.metadata.updatedAt)).toList(),
+                customer.metadata.createdAt,
+                customer.metadata.updatedAt
+        );
     }
 
     @CircuitBreaker(requestVolumeThreshold = 4)
     @Transactional
-    public void save(Customer customer) {
+    public CustomerDTO save(NewCustomerCommand newCustomerCommand) {
+        Customer customer = new Customer();
+        customer.name = newCustomerCommand.name();
+        customer.email = newCustomerCommand.email();
+
         this.customerRepository.persistAndFlush(customer);
+        Customer result = this.customerRepository.findById(customer.id);
+
+        return new CustomerDTO(
+                result.id,
+                result.name,
+                result.name,
+                result.orders.stream().map(i -> new OrderDTO(i.id, i.product, i.quantity, i.metadata.createdAt, i.metadata.updatedAt)).toList(),
+                result.metadata.createdAt,
+                result.metadata.updatedAt
+        );
     }
 
     @CircuitBreaker(requestVolumeThreshold = 4)
     @Transactional
-    public void update(Long id, Customer customer) {
+    public void update(Long id, UpdateCustomerCommand updateCustomerCommand) {
         this.customerRepository.update(
                 "name = :name, email = :email where id = :id",
-                Parameters.with("name", customer.name)
-                        .and("email", customer.email)
+                Parameters.with("name", updateCustomerCommand.name())
+                        .and("email", updateCustomerCommand.email())
                         .and("id", id)
         );
     }
