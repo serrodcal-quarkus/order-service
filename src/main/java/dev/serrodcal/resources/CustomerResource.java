@@ -11,6 +11,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.ResponseStatus;
@@ -19,6 +20,8 @@ import java.util.List;
 
 @ApplicationScoped
 @Path("/v1/customers")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
 public class CustomerResource {
 
     private static final Logger log = Logger.getLogger(CustomerResource.class.getName());
