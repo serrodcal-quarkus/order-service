@@ -3,6 +3,8 @@ package dev.serrodcal.entities;
 import dev.serrodcal.entities.metadata.Metadata;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
@@ -17,9 +19,13 @@ public class Customer extends PanacheEntityBase {
     public Long id;
 
     @Column(nullable = false)
+    @NotNull
+    @NotBlank
     public String name;
 
     @Column(nullable = false, unique = true)
+    @NotNull
+    @NotBlank
     public String email;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)

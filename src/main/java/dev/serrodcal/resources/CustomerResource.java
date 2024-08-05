@@ -9,6 +9,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.jboss.logging.Logger;
@@ -91,7 +92,7 @@ public class CustomerResource {
     @ResponseStatus(201)
     @Timeout(250)
     @Transactional
-    public void addOrder(@PathParam("customerId") Long customerId, Order order) {
+    public void addOrder(@PathParam("customerId") Long customerId, @Valid Order order) {
         log.info("CustomerResource.addOrder()");
         log.debug(order.toString());
 
