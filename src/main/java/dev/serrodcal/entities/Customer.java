@@ -1,5 +1,6 @@
 package dev.serrodcal.entities;
 
+import dev.serrodcal.entities.metadata.Metadata;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 
@@ -23,5 +24,8 @@ public class Customer extends PanacheEntityBase {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     public List<Order> orders;
+
+    @Embedded
+    public Metadata metadata;
 
 }

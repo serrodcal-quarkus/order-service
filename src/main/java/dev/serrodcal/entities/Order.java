@@ -1,5 +1,6 @@
 package dev.serrodcal.entities;
 
+import dev.serrodcal.entities.metadata.Metadata;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 
@@ -18,5 +19,8 @@ public class Order extends PanacheEntityBase {
 
     @Column(nullable = false)
     public Integer quantity;
+
+    @Embedded
+    public Metadata metadata;
 
 }
