@@ -3,7 +3,11 @@ package dev.serrodcal.services;
 import dev.serrodcal.entities.Customer;
 import dev.serrodcal.entities.Order;
 import dev.serrodcal.repositories.CustomerRepository;
+import dev.serrodcal.resources.dtos.pagination.PaginatedQuery;
 import dev.serrodcal.services.dtos.*;
+import dev.serrodcal.services.dtos.pagination.Metadata;
+import dev.serrodcal.services.dtos.pagination.PaginatedDTO;
+import io.quarkus.panache.common.Page;
 import io.quarkus.panache.common.Parameters;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.SessionScoped;
@@ -27,8 +31,9 @@ public class CustomerService {
 
     @CircuitBreaker(requestVolumeThreshold = 4)
     @SessionScoped
-    public List<CustomerDTO> getAll() {
-        List<CustomerDTO> customers = this.customerRepository.listAll().stream()
+    public PaginatedDTO<List<CustomerDTO>> getAll(PaginatedQuery query) {
+        System.out.println(query.toString());
+        List<CustomerDTO> customers = this.customerRepository.findAll().page(Page.of(query.page(), query.size())).list().stream()
                 .map(i -> new CustomerDTO(
                         i.id,
                         i.name,
@@ -38,13 +43,24 @@ public class CustomerService {
                         i.metadata.updatedAt
                 ))
                 .toList();
-        return customers;
+        return new PaginatedDTO<>(
+                customers,
+                new Metadata(
+                        query.page(),
+                        query.size(),
+                        (int) this.customerRepository.count()
+                )
+        );
     }
 
     @CircuitBreaker(requestVolumeThreshold = 4)
     @SessionScoped
     public CustomerDTO getById(Long id) {
         Customer customer = customerRepository.findById(id);
+
+        if(Objects.isNull(customer))
+            throw new NoSuchElementException("Customer id does not exist");
+
         return new CustomerDTO(
                 customer.id,
                 customer.name,

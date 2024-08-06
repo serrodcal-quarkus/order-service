@@ -4,6 +4,7 @@ import dev.serrodcal.entities.Customer;
 import dev.serrodcal.entities.Order;
 import dev.serrodcal.repositories.CustomerRepository;
 import dev.serrodcal.repositories.OrderRepository;
+import dev.serrodcal.resources.dtos.pagination.PaginatedQuery;
 import dev.serrodcal.resources.dtos.requests.AddOrderRequest;
 import dev.serrodcal.resources.dtos.requests.NewCustomerRequest;
 import dev.serrodcal.resources.dtos.requests.UpdateCustomerRequest;
@@ -11,8 +12,10 @@ import dev.serrodcal.resources.dtos.responses.CustomerResponse;
 import dev.serrodcal.resources.dtos.responses.OrderResponse;
 import dev.serrodcal.resources.dtos.responses.pagination.Metadata;
 import dev.serrodcal.resources.dtos.responses.pagination.PaginatedResponse;
+import dev.serrodcal.resources.util.CheckParamUtil;
 import dev.serrodcal.services.CustomerService;
 import dev.serrodcal.services.dtos.*;
+import dev.serrodcal.services.dtos.pagination.PaginatedDTO;
 import io.quarkus.panache.common.Parameters;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.SessionScoped;
@@ -26,6 +29,7 @@ import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.ResponseStatus;
 
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 @Path("/v1/customers")
@@ -40,10 +44,18 @@ public class CustomerResource {
 
     @GET
     @Timeout(250)
-    public PaginatedResponse<List<CustomerResponse>> getAllCustomers() {
+    public PaginatedResponse<List<CustomerResponse>> getAllCustomers(
+            @QueryParam("page") Optional<Integer> pageParam,
+            @QueryParam("size") Optional<Integer> sizeParam
+    ) {
         log.info("CustomerResource.getAllCustomers()");
 
-        List<CustomerResponse> customers = this.customerService.getAll().stream()
+        Integer page = CheckParamUtil.checkPage(pageParam).orElse(0);
+        Integer size = CheckParamUtil.checkSize(sizeParam).orElse(10);
+
+        PaginatedDTO<List<CustomerDTO>> paginatedDTO = this.customerService.getAll(new PaginatedQuery(page, size));
+
+        List<CustomerResponse> customers = paginatedDTO.dto().stream()
                 .map(i -> new CustomerResponse(
                         i.id(),
                         i.name(),
@@ -56,7 +68,11 @@ public class CustomerResource {
 
         return new PaginatedResponse<>(
                 customers,
-                new Metadata(0, 0, 0)
+                new Metadata(
+                        paginatedDTO.metadata().page(),
+                        paginatedDTO.metadata().size(),
+                        paginatedDTO.metadata().total()
+                )
         );
     }
 
