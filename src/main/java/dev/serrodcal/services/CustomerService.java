@@ -14,7 +14,9 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 @ApplicationScoped
@@ -106,6 +108,10 @@ public class CustomerService {
     @Transactional
     public void deleteOrder(Long customerId, Long orderId) {
         Customer customer = this.customerRepository.findById(customerId);
+
+        if (Objects.isNull(customer) || Objects.isNull(customer.orders) || customer.orders.isEmpty())
+            throw new NoSuchElementException("No orders for selected customer");
+
         Order order = customer.orders.stream().filter(i -> i.id == orderId).findAny().get();
         customer.orders.remove(order);
     }
