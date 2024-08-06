@@ -20,13 +20,9 @@ public class Customer extends PanacheEntityBase {
     public Long id;
 
     @Column(nullable = false)
-    @NotNull
-    @NotBlank
     public String name;
 
     @Column(nullable = false, unique = true)
-    @NotNull
-    @NotBlank
     public String email;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)

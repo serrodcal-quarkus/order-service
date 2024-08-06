@@ -17,12 +17,9 @@ public class Order extends PanacheEntityBase {
     public Long id;
 
     @Column(nullable = false)
-    @NotNull
-    @NotBlank
     public String product;
 
     @Column(nullable = false)
-    @NotNull
     public Integer quantity;
 
     @Embedded
