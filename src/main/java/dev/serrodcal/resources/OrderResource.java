@@ -4,7 +4,11 @@ import dev.serrodcal.entities.Customer;
 import dev.serrodcal.entities.Order;
 import dev.serrodcal.repositories.CustomerRepository;
 import dev.serrodcal.repositories.OrderRepository;
+import dev.serrodcal.resources.dtos.responses.OrderResponse;
+import dev.serrodcal.resources.dtos.responses.pagination.Metadata;
+import dev.serrodcal.resources.dtos.responses.pagination.PaginatedResponse;
 import dev.serrodcal.services.OrderService;
+import dev.serrodcal.services.dtos.OrderDTO;
 import io.quarkus.panache.common.Parameters;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.SessionScoped;
@@ -31,19 +35,31 @@ public class OrderResource {
 
     @GET
     @Timeout(250)
-    public List<Order> getAllOrders() {
+    public PaginatedResponse<List<OrderResponse>> getAllOrders() {
         log.info("OrderResource.getAllOrders()");
 
-        return this.orderService.getAll();
+        return new PaginatedResponse<>(
+                this.orderService.getAll().stream()
+                        .map(i -> new OrderResponse(i.id(), i.product(), i.quantity(), i.createdAt(), i.updatedAt()))
+                        .toList(),
+                new Metadata(0, 0, 0)
+        );
     }
 
     @GET
     @Path("/{id}")
     @Timeout(250)
-    public Order getOrderById(@PathParam("id") Long id) {
+    public OrderResponse getOrderById(@PathParam("id") Long id) {
         log.info("OrderResource.getOrderById()");
+        OrderDTO orderDTO = this.orderService.getById(id);
 
-        return this.orderService.getById(id);
+        return new OrderResponse(
+                orderDTO.id(),
+                orderDTO.product(),
+                orderDTO.quantity(),
+                orderDTO.createdAt(),
+                orderDTO.updatedAt()
+        );
     }
 
     @PUT

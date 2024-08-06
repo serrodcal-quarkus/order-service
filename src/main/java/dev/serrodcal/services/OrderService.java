@@ -2,6 +2,7 @@ package dev.serrodcal.services;
 
 import dev.serrodcal.entities.Order;
 import dev.serrodcal.repositories.OrderRepository;
+import dev.serrodcal.services.dtos.OrderDTO;
 import io.quarkus.panache.common.Parameters;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.SessionScoped;
@@ -19,14 +20,23 @@ public class OrderService {
 
     @CircuitBreaker(requestVolumeThreshold = 4)
     @SessionScoped
-    public List<Order> getAll() {
-        return orderRepository.listAll();
+    public List<OrderDTO> getAll() {
+        return orderRepository.listAll().stream()
+                .map(i -> new OrderDTO(i.id, i.product, i.quantity, i.metadata.createdAt, i.metadata.updatedAt))
+                .toList();
     }
 
     @CircuitBreaker(requestVolumeThreshold = 4)
     @SessionScoped
-    public Order getById(Long id) {
-        return orderRepository.findById(id);
+    public OrderDTO getById(Long id) {
+        Order order = orderRepository.findById(id);
+        return new OrderDTO(
+                order.id,
+                order.product,
+                order.quantity,
+                order.metadata.createdAt,
+                order.metadata.updatedAt
+        );
     }
 
     @CircuitBreaker(requestVolumeThreshold = 4)

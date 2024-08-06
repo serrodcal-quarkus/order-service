@@ -9,6 +9,8 @@ import dev.serrodcal.resources.dtos.requests.NewCustomerRequest;
 import dev.serrodcal.resources.dtos.requests.UpdateCustomerRequest;
 import dev.serrodcal.resources.dtos.responses.CustomerResponse;
 import dev.serrodcal.resources.dtos.responses.OrderResponse;
+import dev.serrodcal.resources.dtos.responses.pagination.Metadata;
+import dev.serrodcal.resources.dtos.responses.pagination.PaginatedResponse;
 import dev.serrodcal.services.CustomerService;
 import dev.serrodcal.services.dtos.*;
 import io.quarkus.panache.common.Parameters;
@@ -38,7 +40,7 @@ public class CustomerResource {
 
     @GET
     @Timeout(250)
-    public List<CustomerResponse> getAllCustomers() {
+    public PaginatedResponse<List<CustomerResponse>> getAllCustomers() {
         log.info("CustomerResource.getAllCustomers()");
 
         List<CustomerResponse> customers = this.customerService.getAll().stream()
@@ -52,7 +54,10 @@ public class CustomerResource {
                 ))
                 .toList();
 
-        return customers;
+        return new PaginatedResponse<>(
+                customers,
+                new Metadata(0, 0, 0)
+        );
     }
 
     @GET
