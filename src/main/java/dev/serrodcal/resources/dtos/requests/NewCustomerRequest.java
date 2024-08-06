@@ -1,6 +1,9 @@
 package dev.serrodcal.resources.dtos.requests;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 public record NewCustomerRequest(
-        String name,
-        String email
+        @NotNull @NotBlank String name,
+        @NotNull @NotBlank String email
 ) { }
