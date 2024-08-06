@@ -3,10 +3,7 @@ package dev.serrodcal.services;
 import dev.serrodcal.entities.Customer;
 import dev.serrodcal.entities.Order;
 import dev.serrodcal.repositories.CustomerRepository;
-import dev.serrodcal.services.dtos.CustomerDTO;
-import dev.serrodcal.services.dtos.NewCustomerCommand;
-import dev.serrodcal.services.dtos.OrderDTO;
-import dev.serrodcal.services.dtos.UpdateCustomerCommand;
+import dev.serrodcal.services.dtos.*;
 import io.quarkus.panache.common.Parameters;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.SessionScoped;
@@ -97,8 +94,12 @@ public class CustomerService {
 
     @CircuitBreaker(requestVolumeThreshold = 4)
     @Transactional
-    public void addOrder(Long customerId, Order order) {
+    public void addOrder(Long customerId, AddOrderCommand addOrderCommand) {
         Customer customer = this.customerRepository.findById(customerId);
+
+        Order order = new Order();
+        order.product = addOrderCommand.product();
+        order.quantity = addOrderCommand.quantity();
 
         this.orderService.save(order);
         customer.orders.add(order);

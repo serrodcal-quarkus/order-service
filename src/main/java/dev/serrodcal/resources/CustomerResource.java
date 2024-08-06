@@ -4,15 +4,13 @@ import dev.serrodcal.entities.Customer;
 import dev.serrodcal.entities.Order;
 import dev.serrodcal.repositories.CustomerRepository;
 import dev.serrodcal.repositories.OrderRepository;
+import dev.serrodcal.resources.dtos.requests.AddOrderRequest;
 import dev.serrodcal.resources.dtos.requests.NewCustomerRequest;
 import dev.serrodcal.resources.dtos.requests.UpdateCustomerRequest;
 import dev.serrodcal.resources.dtos.responses.CustomerResponse;
 import dev.serrodcal.resources.dtos.responses.OrderResponse;
 import dev.serrodcal.services.CustomerService;
-import dev.serrodcal.services.dtos.CustomerDTO;
-import dev.serrodcal.services.dtos.NewCustomerCommand;
-import dev.serrodcal.services.dtos.OrderDTO;
-import dev.serrodcal.services.dtos.UpdateCustomerCommand;
+import dev.serrodcal.services.dtos.*;
 import io.quarkus.panache.common.Parameters;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.SessionScoped;
@@ -124,11 +122,16 @@ public class CustomerResource {
     @Path("/{customerId}/orders")
     @ResponseStatus(201)
     @Timeout(250)
-    public void addOrder(@PathParam("customerId") Long customerId, @Valid Order order) {
+    public void addOrder(@PathParam("customerId") Long customerId, @Valid AddOrderRequest addOrderRequest) {
         log.info("CustomerResource.addOrder()");
-        log.debug(order.toString());
+        log.debug(addOrderRequest.toString());
 
-        this.customerService.addOrder(customerId, order);
+        AddOrderCommand addOrderCommand = new AddOrderCommand(
+                addOrderRequest.product(),
+                addOrderRequest.quantity()
+        );
+
+        this.customerService.addOrder(customerId, addOrderCommand);
     }
 
     @DELETE
