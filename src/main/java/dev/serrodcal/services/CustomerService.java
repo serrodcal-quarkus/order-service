@@ -32,7 +32,6 @@ public class CustomerService {
     @CircuitBreaker(requestVolumeThreshold = 4)
     @SessionScoped
     public PaginatedDTO<List<CustomerDTO>> getAll(PaginatedQuery query) {
-        System.out.println(query.toString());
         List<CustomerDTO> customers = this.customerRepository.findAll().page(Page.of(query.page(), query.size())).list().stream()
                 .map(i -> new CustomerDTO(
                         i.id,
