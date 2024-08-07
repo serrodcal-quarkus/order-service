@@ -1,14 +1,12 @@
-package dev.serrodcal.entities;
+package dev.serrodcal.dbos;
 
-import dev.serrodcal.entities.metadata.Metadata;
+import dev.serrodcal.dbos.metadata.Metadata;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 @Entity(name = "orders")
 @Cacheable
-public class Order extends PanacheEntityBase {
+public class OrderDBO extends PanacheEntityBase {
 
     @Id
     @SequenceGenerator(allocationSize = 1, name = "ordersSequence", schema = "public", sequenceName = "orders_seq")

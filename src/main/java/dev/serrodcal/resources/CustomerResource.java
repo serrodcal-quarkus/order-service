@@ -1,9 +1,5 @@
 package dev.serrodcal.resources;
 
-import dev.serrodcal.entities.Customer;
-import dev.serrodcal.entities.Order;
-import dev.serrodcal.repositories.CustomerRepository;
-import dev.serrodcal.repositories.OrderRepository;
 import dev.serrodcal.resources.dtos.pagination.PaginatedQuery;
 import dev.serrodcal.resources.dtos.requests.AddOrderRequest;
 import dev.serrodcal.resources.dtos.requests.NewCustomerRequest;
@@ -16,11 +12,8 @@ import dev.serrodcal.resources.util.CheckParamUtil;
 import dev.serrodcal.services.CustomerService;
 import dev.serrodcal.services.dtos.*;
 import dev.serrodcal.services.dtos.pagination.PaginatedDTO;
-import io.quarkus.panache.common.Parameters;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;

@@ -1,17 +1,15 @@
-package dev.serrodcal.entities;
+package dev.serrodcal.dbos;
 
-import dev.serrodcal.entities.metadata.Metadata;
+import dev.serrodcal.dbos.metadata.Metadata;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity(name = "customers")
 @Cacheable
-public class Customer extends PanacheEntityBase {
+public class CustomerDBO extends PanacheEntityBase {
 
     @Id
     @SequenceGenerator(allocationSize = 1, name = "customersSequence", schema = "public", sequenceName = "customers_seq")
@@ -26,7 +24,7 @@ public class Customer extends PanacheEntityBase {
     public String email;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    public List<Order> orders = new ArrayList<>();
+    public List<OrderDBO> orderDBOS = new ArrayList<>();
 
     @Embedded
     public Metadata metadata;

@@ -1,6 +1,6 @@
 package dev.serrodcal.services;
 
-import dev.serrodcal.entities.Order;
+import dev.serrodcal.dbos.OrderDBO;
 import dev.serrodcal.repositories.OrderRepository;
 import dev.serrodcal.resources.dtos.pagination.PaginatedQuery;
 import dev.serrodcal.services.dtos.OrderDTO;
@@ -43,33 +43,33 @@ public class OrderService {
     @CircuitBreaker(requestVolumeThreshold = 4)
     @SessionScoped
     public OrderDTO getById(Long id) {
-        Order order = orderRepository.findById(id);
+        OrderDBO orderDBO = orderRepository.findById(id);
 
-        if (Objects.isNull(order))
+        if (Objects.isNull(orderDBO))
             throw new NoSuchElementException("Order id does not exist");
 
         return new OrderDTO(
-                order.id,
-                order.product,
-                order.quantity,
-                order.metadata.createdAt,
-                order.metadata.updatedAt
+                orderDBO.id,
+                orderDBO.product,
+                orderDBO.quantity,
+                orderDBO.metadata.createdAt,
+                orderDBO.metadata.updatedAt
         );
     }
 
     @CircuitBreaker(requestVolumeThreshold = 4)
     @Transactional
-    public void save(Order order) {
-        this.orderRepository.persistAndFlush(order);
+    public void save(OrderDBO orderDBO) {
+        this.orderRepository.persistAndFlush(orderDBO);
     }
 
     @CircuitBreaker(requestVolumeThreshold = 4)
     @Transactional
-    public void update(Long id, Order order) {
+    public void update(Long id, OrderDBO orderDBO) {
         this.orderRepository.update(
                 "product = :product, quantity = :quantity where id = :id",
-                Parameters.with("product", order.product)
-                        .and("quantity", order.quantity)
+                Parameters.with("product", orderDBO.product)
+                        .and("quantity", orderDBO.quantity)
                         .and("id", id)
         );
     }

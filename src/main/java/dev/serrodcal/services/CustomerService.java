@@ -1,7 +1,7 @@
 package dev.serrodcal.services;
 
-import dev.serrodcal.entities.Customer;
-import dev.serrodcal.entities.Order;
+import dev.serrodcal.dbos.CustomerDBO;
+import dev.serrodcal.dbos.OrderDBO;
 import dev.serrodcal.repositories.CustomerRepository;
 import dev.serrodcal.resources.dtos.pagination.PaginatedQuery;
 import dev.serrodcal.services.dtos.*;
@@ -15,7 +15,6 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -37,7 +36,7 @@ public class CustomerService {
                         i.id,
                         i.name,
                         i.email,
-                        i.orders.stream().map(j -> new OrderDTO(j.id, j.product, j.quantity, j.metadata.createdAt, j.metadata.updatedAt)).toList(),
+                        i.orderDBOS.stream().map(j -> new OrderDTO(j.id, j.product, j.quantity, j.metadata.createdAt, j.metadata.updatedAt)).toList(),
                         i.metadata.createdAt,
                         i.metadata.updatedAt
                 ))
@@ -55,36 +54,36 @@ public class CustomerService {
     @CircuitBreaker(requestVolumeThreshold = 4)
     @SessionScoped
     public CustomerDTO getById(Long id) {
-        Customer customer = customerRepository.findById(id);
+        CustomerDBO customerDBO = customerRepository.findById(id);
 
-        if(Objects.isNull(customer))
+        if(Objects.isNull(customerDBO))
             throw new NoSuchElementException("Customer id does not exist");
 
         return new CustomerDTO(
-                customer.id,
-                customer.name,
-                customer.name,
-                customer.orders.stream().map(i -> new OrderDTO(i.id, i.product, i.quantity, i.metadata.createdAt, i.metadata.updatedAt)).toList(),
-                customer.metadata.createdAt,
-                customer.metadata.updatedAt
+                customerDBO.id,
+                customerDBO.name,
+                customerDBO.name,
+                customerDBO.orderDBOS.stream().map(i -> new OrderDTO(i.id, i.product, i.quantity, i.metadata.createdAt, i.metadata.updatedAt)).toList(),
+                customerDBO.metadata.createdAt,
+                customerDBO.metadata.updatedAt
         );
     }
 
     @CircuitBreaker(requestVolumeThreshold = 4)
     @Transactional
     public CustomerDTO save(NewCustomerCommand newCustomerCommand) {
-        Customer customer = new Customer();
-        customer.name = newCustomerCommand.name();
-        customer.email = newCustomerCommand.email();
+        CustomerDBO customerDBO = new CustomerDBO();
+        customerDBO.name = newCustomerCommand.name();
+        customerDBO.email = newCustomerCommand.email();
 
-        this.customerRepository.persistAndFlush(customer);
-        Customer result = this.customerRepository.findById(customer.id);
+        this.customerRepository.persistAndFlush(customerDBO);
+        CustomerDBO result = this.customerRepository.findById(customerDBO.id);
 
         return new CustomerDTO(
                 result.id,
                 result.name,
                 result.name,
-                result.orders.stream().map(i -> new OrderDTO(i.id, i.product, i.quantity, i.metadata.createdAt, i.metadata.updatedAt)).toList(),
+                result.orderDBOS.stream().map(i -> new OrderDTO(i.id, i.product, i.quantity, i.metadata.createdAt, i.metadata.updatedAt)).toList(),
                 result.metadata.createdAt,
                 result.metadata.updatedAt
         );
@@ -110,25 +109,25 @@ public class CustomerService {
     @CircuitBreaker(requestVolumeThreshold = 4)
     @Transactional
     public void addOrder(Long customerId, AddOrderCommand addOrderCommand) {
-        Customer customer = this.customerRepository.findById(customerId);
+        CustomerDBO customerDBO = this.customerRepository.findById(customerId);
 
-        Order order = new Order();
-        order.product = addOrderCommand.product();
-        order.quantity = addOrderCommand.quantity();
+        OrderDBO orderDBO = new OrderDBO();
+        orderDBO.product = addOrderCommand.product();
+        orderDBO.quantity = addOrderCommand.quantity();
 
-        this.orderService.save(order);
-        customer.orders.add(order);
+        this.orderService.save(orderDBO);
+        customerDBO.orderDBOS.add(orderDBO);
     }
 
     @CircuitBreaker(requestVolumeThreshold = 4)
     @Transactional
     public void deleteOrder(Long customerId, Long orderId) {
-        Customer customer = this.customerRepository.findById(customerId);
+        CustomerDBO customerDBO = this.customerRepository.findById(customerId);
 
-        if (Objects.isNull(customer) || Objects.isNull(customer.orders) || customer.orders.isEmpty())
+        if (Objects.isNull(customerDBO) || Objects.isNull(customerDBO.orderDBOS) || customerDBO.orderDBOS.isEmpty())
             throw new NoSuchElementException("No orders for selected customer");
 
-        Order order = customer.orders.stream().filter(i -> i.id == orderId).findAny().get();
-        customer.orders.remove(order);
+        OrderDBO orderDBO = customerDBO.orderDBOS.stream().filter(i -> i.id == orderId).findAny().get();
+        customerDBO.orderDBOS.remove(orderDBO);
     }
 }

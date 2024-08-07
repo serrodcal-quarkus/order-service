@@ -1,8 +1,8 @@
 package dev.serrodcal.repositories;
 
-import dev.serrodcal.entities.Customer;
+import dev.serrodcal.dbos.CustomerDBO;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 
-public interface CustomerRepository extends PanacheRepository<Customer> {
+public interface CustomerRepository extends PanacheRepository<CustomerDBO> {
 
 }

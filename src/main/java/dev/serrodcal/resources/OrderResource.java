@@ -1,6 +1,6 @@
 package dev.serrodcal.resources;
 
-import dev.serrodcal.entities.Order;
+import dev.serrodcal.dbos.OrderDBO;
 import dev.serrodcal.resources.dtos.pagination.PaginatedQuery;
 import dev.serrodcal.resources.dtos.responses.OrderResponse;
 import dev.serrodcal.resources.dtos.responses.pagination.Metadata;
@@ -75,11 +75,11 @@ public class OrderResource {
     @PUT
     @Path("/{id}")
     @Timeout(250)
-    public void updateOrder(@PathParam("id") Long id, @Valid Order order) {
+    public void updateOrder(@PathParam("id") Long id, @Valid OrderDBO orderDBO) {
         log.info("OrderResource.updateOrder()");
-        log.debug(order.toString());
+        log.debug(orderDBO.toString());
 
-        this.orderService.update(id, order);
+        this.orderService.update(id, orderDBO);
     }
 
 }

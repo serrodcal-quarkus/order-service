@@ -1,4 +1,4 @@
-package dev.serrodcal.entities.metadata;
+package dev.serrodcal.dbos.metadata;
 
 import jakarta.persistence.Embeddable;
 import org.hibernate.annotations.CreationTimestamp;
