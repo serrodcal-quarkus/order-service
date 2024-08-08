@@ -1,5 +1,6 @@
 package dev.serrodcal.orders.infrastructure;
 
+import dev.serrodcal.orders.infrastructure.dtos.UpdateOrderRequest;
 import dev.serrodcal.shared.infrastructure.dtos.PaginatedQuery;
 import dev.serrodcal.orders.infrastructure.dtos.OrderResponse;
 import dev.serrodcal.shared.infrastructure.dtos.Metadata;
@@ -74,11 +75,13 @@ public class OrderResource {
     @PUT
     @Path("/{id}")
     @Timeout(250)
-    public void updateOrder(@PathParam("id") Long id, @Valid OrderDBO orderDBO) {
+    public void updateOrder(@PathParam("id") Long id, @Valid UpdateOrderRequest updateOrderRequest) {
         log.info("OrderResource.updateOrder()");
-        log.debug(orderDBO.toString());
+        log.debug(updateOrderRequest.toString());
 
-        this.orderService.update(id, orderDBO);
+        System.out.println(updateOrderRequest.product());
+
+        this.orderService.update(id, new OrderDTO(null, updateOrderRequest.product(), updateOrderRequest.quantity(), null, null));
     }
 
 }

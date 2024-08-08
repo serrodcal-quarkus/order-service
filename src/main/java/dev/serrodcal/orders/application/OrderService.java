@@ -1,13 +1,11 @@
 package dev.serrodcal.orders.application;
 
-import dev.serrodcal.orders.infrastructure.OrderDBO;
+import dev.serrodcal.orders.domain.Order;
 import dev.serrodcal.orders.domain.OrderRepository;
 import dev.serrodcal.shared.infrastructure.dtos.PaginatedQuery;
 import dev.serrodcal.orders.application.dtos.OrderDTO;
 import dev.serrodcal.shared.application.dtos.Metadata;
 import dev.serrodcal.shared.application.dtos.PaginatedDTO;
-import io.quarkus.panache.common.Page;
-import io.quarkus.panache.common.Parameters;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Inject;
@@ -27,8 +25,8 @@ public class OrderService {
     @CircuitBreaker(requestVolumeThreshold = 4)
     @SessionScoped
     public PaginatedDTO<List<OrderDTO>> getAll(PaginatedQuery query) {
-        List<OrderDTO> orders = orderRepository.findAll().page(Page.of(query.page(), query.size())).list().stream()
-                .map(i -> new OrderDTO(i.id, i.product, i.quantity, i.metadata.createdAt, i.metadata.updatedAt))
+        List<OrderDTO> orders = this.orderRepository.getAll(query.page(), query.size()).stream()
+                .map(i -> new OrderDTO(i.getId(), i.getProduct(), i.getQuantity(), i.getCreatedAt(), i.getUpdatedAt()))
                 .toList();
         return new PaginatedDTO<>(
             orders,
@@ -43,35 +41,27 @@ public class OrderService {
     @CircuitBreaker(requestVolumeThreshold = 4)
     @SessionScoped
     public OrderDTO getById(Long id) {
-        OrderDBO orderDBO = orderRepository.findById(id);
+        Order order = new Order(id, "someProduct", 1, null, null);
+        Order result = this.orderRepository.getById(order);
 
-        if (Objects.isNull(orderDBO))
+        if (Objects.isNull(result))
             throw new NoSuchElementException("Order id does not exist");
 
         return new OrderDTO(
-                orderDBO.id,
-                orderDBO.product,
-                orderDBO.quantity,
-                orderDBO.metadata.createdAt,
-                orderDBO.metadata.updatedAt
+                result.getId(),
+                result.getProduct(),
+                result.getQuantity(),
+                result.getCreatedAt(),
+                result.getUpdatedAt()
         );
     }
 
     @CircuitBreaker(requestVolumeThreshold = 4)
     @Transactional
-    public void save(OrderDBO orderDBO) {
-        this.orderRepository.persistAndFlush(orderDBO);
-    }
+    public void update(Long id, OrderDTO orderDTO) {
+        Order order = new Order(id, orderDTO.product(), orderDTO.quantity(), null, null);
 
-    @CircuitBreaker(requestVolumeThreshold = 4)
-    @Transactional
-    public void update(Long id, OrderDBO orderDBO) {
-        this.orderRepository.update(
-                "product = :product, quantity = :quantity where id = :id",
-                Parameters.with("product", orderDBO.product)
-                        .and("quantity", orderDBO.quantity)
-                        .and("id", id)
-        );
+        this.orderRepository.updateOrder(order);
     }
 
 

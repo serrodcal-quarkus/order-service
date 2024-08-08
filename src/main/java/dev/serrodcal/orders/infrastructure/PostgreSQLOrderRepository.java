@@ -44,44 +44,15 @@ public class PostgreSQLOrderRepository implements OrderRepository {
     }
 
     @Override
-    public Order createOrder(Order order) throws IllegalAccessException {
-        Objects.requireNonNull(order, "Customer cannot be null");
-
-        OrderDBO dbo = new OrderDBO();
-        dbo.product = order.getProduct();
-        dbo.quantity = order.getQuantity();
-        dbo.persistAndFlush();
-
-        return new Order(
-                dbo.id,
-                dbo.product,
-                dbo.quantity,
-                dbo.metadata.createdAt,
-                dbo.metadata.updatedAt
-        );
-    }
-
-    @Override
     public void updateOrder(Order order) {
         Objects.requireNonNull(order, "Order cannot be null");
 
         update(
                 "product = :product, quantity = :quantity where id = :id",
-                Parameters.with("name", order.getProduct())
-                        .and("email", order.getQuantity())
+                Parameters.with("product", order.getProduct())
+                        .and("quantity", order.getQuantity())
                         .and("id", order.getId())
         );
-    }
-
-    @Override
-    public void deleteOrder(Order order) {
-        Objects.requireNonNull(order, "Customer cannot be null");
-
-        if (Objects.isNull(order.getId()))
-            throw new IllegalArgumentException("Customer id is null");
-
-        deleteById(order.getId());
-
     }
 
 }

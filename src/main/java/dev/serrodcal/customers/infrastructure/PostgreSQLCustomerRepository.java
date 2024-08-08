@@ -115,7 +115,7 @@ public class PostgreSQLCustomerRepository implements CustomerRepository {
 
         CustomerDBO customerDBO = findById(customer.getId());
 
-        if (Objects.isNull(customer))
+        if (Objects.isNull(customerDBO))
             throw new NoSuchElementException("Does not exist customer");
 
         OrderDBO orderDBO = new OrderDBO();

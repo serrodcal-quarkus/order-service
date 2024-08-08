@@ -93,7 +93,7 @@ public class CustomerResource {
     @POST
     @ResponseStatus(201)
     @Timeout(250)
-    public CustomerResponse createCustomer(NewCustomerRequest newCustomerRequest) {
+    public CustomerResponse createCustomer(NewCustomerRequest newCustomerRequest) throws IllegalAccessException {
         log.info("CustomerResource.createCustomer()");
         log.debug(newCustomerRequest.toString());
 

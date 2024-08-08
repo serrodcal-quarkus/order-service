@@ -18,12 +18,12 @@ public class CustomerTest {
     @BeforeEach
     public void setUp() throws IllegalAccessException {
         List<Order> orders = List.of(
-                new Order(1L, "phone", 2),
-                new Order(2L, "laptop", 1),
-                new Order(3L, "pocketCharger", 1)
+                new Order(1L, "phone", 2, null, null),
+                new Order(2L, "laptop", 1, null, null),
+                new Order(3L, "pocketCharger", 1, null, null)
                 );
 
-        this.customer = new Customer(1L, "John", "john@email.com", orders);
+        this.customer = new Customer(1L, "John", "john@email.com", orders, null, null);
     }
 
     // Happy path
@@ -55,7 +55,7 @@ public class CustomerTest {
     @Test
     public void addNonExistingOrder() throws IllegalAccessException {
         // Given
-        Order newOrder = new Order(4L, "oranges", 1);
+        Order newOrder = new Order(4L, "oranges", 1, null, null);
 
         // When
         this.customer.addOrder(newOrder);
@@ -68,7 +68,7 @@ public class CustomerTest {
     @Test
     public void removeExistingOrder() throws IllegalAccessException {
         // Given
-        Order existingOrder = new Order(3L, "pocketCharger", 1);
+        Order existingOrder = new Order(3L, "pocketCharger", 1, null, null);
 
         // When
         this.customer.removeOrder(existingOrder);
@@ -81,7 +81,7 @@ public class CustomerTest {
     @Test
     public void updateOrder() throws IllegalAccessException {
         // Given
-        Order orderToUpdate = new Order(3L, "pocketCharger", 3);
+        Order orderToUpdate = new Order(3L, "pocketCharger", 3, null, null);
 
         // When
         this.customer.updateOrder(orderToUpdate);

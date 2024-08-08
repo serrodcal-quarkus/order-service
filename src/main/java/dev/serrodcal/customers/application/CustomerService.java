@@ -4,25 +4,21 @@ import dev.serrodcal.customers.application.dtos.AddOrderCommand;
 import dev.serrodcal.customers.application.dtos.CustomerDTO;
 import dev.serrodcal.customers.application.dtos.NewCustomerCommand;
 import dev.serrodcal.customers.application.dtos.UpdateCustomerCommand;
-import dev.serrodcal.customers.infrastructure.CustomerDBO;
+import dev.serrodcal.customers.domain.Customer;
 import dev.serrodcal.orders.application.dtos.OrderDTO;
-import dev.serrodcal.orders.infrastructure.OrderDBO;
+import dev.serrodcal.orders.domain.Order;
 import dev.serrodcal.customers.domain.CustomerRepository;
 import dev.serrodcal.shared.infrastructure.dtos.PaginatedQuery;
-import dev.serrodcal.orders.application.OrderService;
 import dev.serrodcal.shared.application.dtos.Metadata;
 import dev.serrodcal.shared.application.dtos.PaginatedDTO;
-import io.quarkus.panache.common.Page;
-import io.quarkus.panache.common.Parameters;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
 
 @ApplicationScoped
 public class CustomerService {
@@ -30,20 +26,17 @@ public class CustomerService {
     @Inject
     CustomerRepository customerRepository;
 
-    @Inject
-    OrderService orderService;
-
     @CircuitBreaker(requestVolumeThreshold = 4)
     @SessionScoped
     public PaginatedDTO<List<CustomerDTO>> getAll(PaginatedQuery query) {
-        List<CustomerDTO> customers = this.customerRepository.findAll().page(Page.of(query.page(), query.size())).list().stream()
+        List<CustomerDTO> customers = this.customerRepository.getAll(query.page(), query.size()).stream()
                 .map(i -> new CustomerDTO(
-                        i.id,
-                        i.name,
-                        i.email,
-                        i.orderDBOS.stream().map(j -> new OrderDTO(j.id, j.product, j.quantity, j.metadata.createdAt, j.metadata.updatedAt)).toList(),
-                        i.metadata.createdAt,
-                        i.metadata.updatedAt
+                        i.getId(),
+                        i.getName(),
+                        i.getEmail(),
+                        i.getOrders().stream().map(j -> new OrderDTO(j.getId(), j.getProduct(), j.getQuantity(), j.getCreatedAt(), j.getUpdatedAt())).toList(),
+                        i.getCreatedAt(),
+                        i.getUpdatedAt()
                 ))
                 .toList();
         return new PaginatedDTO<>(
@@ -59,80 +52,80 @@ public class CustomerService {
     @CircuitBreaker(requestVolumeThreshold = 4)
     @SessionScoped
     public CustomerDTO getById(Long id) {
-        CustomerDBO customerDBO = customerRepository.findById(id);
-
-        if(Objects.isNull(customerDBO))
-            throw new NoSuchElementException("Customer id does not exist");
+        Customer customer = new Customer(id, "someName", "email@email.com", new ArrayList<>(), null, null);
+        Customer result = this.customerRepository.getById(customer);
 
         return new CustomerDTO(
-                customerDBO.id,
-                customerDBO.name,
-                customerDBO.name,
-                customerDBO.orderDBOS.stream().map(i -> new OrderDTO(i.id, i.product, i.quantity, i.metadata.createdAt, i.metadata.updatedAt)).toList(),
-                customerDBO.metadata.createdAt,
-                customerDBO.metadata.updatedAt
+                result.getId(),
+                result.getName(),
+                result.getEmail(),
+                result.getOrders().stream().map(i -> new OrderDTO(i.getId(), i.getProduct(), i.getQuantity(), i.getCreatedAt(), i.getUpdatedAt())).toList(),
+                result.getCreatedAt(),
+                result.getUpdatedAt()
         );
     }
 
     @CircuitBreaker(requestVolumeThreshold = 4)
     @Transactional
-    public CustomerDTO save(NewCustomerCommand newCustomerCommand) {
-        CustomerDBO customerDBO = new CustomerDBO();
-        customerDBO.name = newCustomerCommand.name();
-        customerDBO.email = newCustomerCommand.email();
-
-        this.customerRepository.persistAndFlush(customerDBO);
-        CustomerDBO result = this.customerRepository.findById(customerDBO.id);
+    public CustomerDTO save(NewCustomerCommand newCustomerCommand) throws IllegalAccessException {
+        Customer customer = new Customer(null, newCustomerCommand.name(), newCustomerCommand.email(), new ArrayList<>(), null, null);
+        Customer result = this.customerRepository.createCustomer(customer);
 
         return new CustomerDTO(
-                result.id,
-                result.name,
-                result.name,
-                result.orderDBOS.stream().map(i -> new OrderDTO(i.id, i.product, i.quantity, i.metadata.createdAt, i.metadata.updatedAt)).toList(),
-                result.metadata.createdAt,
-                result.metadata.updatedAt
+                result.getId(),
+                result.getName(),
+                result.getEmail(),
+                result.getOrders().stream().map(i -> new OrderDTO(i.getId(), i.getProduct(), i.getQuantity(), i.getCreatedAt(), i.getUpdatedAt())).toList(),
+                result.getCreatedAt(),
+                result.getUpdatedAt()
         );
+//        CustomerDBO customerDBO = new CustomerDBO();
+//        customerDBO.name = newCustomerCommand.name();
+//        customerDBO.email = newCustomerCommand.email();
+//
+//        this.customerRepository.persistAndFlush(customerDBO);
+//        CustomerDBO result = this.customerRepository.findById(customerDBO.id);
+//
+//        return new CustomerDTO(
+//                result.id,
+//                result.name,
+//                result.email,
+//                result.orderDBOS.stream().map(i -> new OrderDTO(i.id, i.product, i.quantity, i.metadata.createdAt, i.metadata.updatedAt)).toList(),
+//                result.metadata.createdAt,
+//                result.metadata.updatedAt
+//        );
     }
 
     @CircuitBreaker(requestVolumeThreshold = 4)
     @Transactional
     public void update(Long id, UpdateCustomerCommand updateCustomerCommand) {
-        this.customerRepository.update(
-                "name = :name, email = :email where id = :id",
-                Parameters.with("name", updateCustomerCommand.name())
-                        .and("email", updateCustomerCommand.email())
-                        .and("id", id)
-        );
+        Customer customer = new Customer(id, updateCustomerCommand.name(), updateCustomerCommand.email(), new ArrayList<>(), null, null);
+
+        this.customerRepository.updateCustomer(customer);
     }
 
     @CircuitBreaker(requestVolumeThreshold = 4)
     @Transactional
     public void deleteById(Long id) {
-        this.customerRepository.deleteById(id);
+        Customer customer = new Customer(id, "someName", "email@email.com", new ArrayList<>(), null, null);
+        this.customerRepository.deleteCustomer(customer);
     }
 
     @CircuitBreaker(requestVolumeThreshold = 4)
     @Transactional
     public void addOrder(Long customerId, AddOrderCommand addOrderCommand) {
-        CustomerDBO customerDBO = this.customerRepository.findById(customerId);
+        Customer customer = new Customer(customerId, "someName", "email@email.com", new ArrayList<>(), null, null);
+        Order order = new Order(null, addOrderCommand.product(), addOrderCommand.quantity(), null, null);
 
-        OrderDBO orderDBO = new OrderDBO();
-        orderDBO.product = addOrderCommand.product();
-        orderDBO.quantity = addOrderCommand.quantity();
-
-        this.orderService.save(orderDBO);
-        customerDBO.orderDBOS.add(orderDBO);
+        this.customerRepository.addOrder(customer, order);
     }
 
     @CircuitBreaker(requestVolumeThreshold = 4)
     @Transactional
     public void deleteOrder(Long customerId, Long orderId) {
-        CustomerDBO customerDBO = this.customerRepository.findById(customerId);
+        Customer customer = new Customer(customerId, "someName", "email@email.com", new ArrayList<>(), null, null);
+        Order order = new Order(orderId, "someProduct", 1, null, null);
 
-        if (Objects.isNull(customerDBO) || Objects.isNull(customerDBO.orderDBOS) || customerDBO.orderDBOS.isEmpty())
-            throw new NoSuchElementException("No orders for selected customer");
-
-        OrderDBO orderDBO = customerDBO.orderDBOS.stream().filter(i -> i.id == orderId).findAny().get();
-        customerDBO.orderDBOS.remove(orderDBO);
+        this.customerRepository.removeOrder(customer, order);
     }
 }
