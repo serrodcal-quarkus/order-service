@@ -19,11 +19,13 @@ public class Customer {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public Customer(Long id, String name, String email, List<Order> orders) {
+    public Customer(Long id, String name, String email, List<Order> orders, LocalDateTime createdAt, LocalDateTime updatedAt) throws IllegalArgumentException {
         this.id = id;
         this.name = new CustomerName(name);
         this.email = new CustomerEmail(email);
         this.orders = new ArrayList<>(orders);
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     public Long getId() {

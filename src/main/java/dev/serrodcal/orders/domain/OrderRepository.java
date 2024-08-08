@@ -9,9 +9,9 @@ public interface OrderRepository extends PanacheRepository<OrderDBO> {
 
     public List<Order> getAll(Integer page, Integer size);
 
-    public List<Order> getById(Order order, Integer page, Integer size);
+    public Order getById(Order order);
 
-    public Order createOrder(Order order);
+    public Order createOrder(Order order) throws IllegalAccessException;
 
     public void updateOrder(Order order);
 

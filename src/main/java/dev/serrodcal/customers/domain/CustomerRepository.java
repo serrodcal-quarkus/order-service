@@ -10,9 +10,9 @@ public interface CustomerRepository extends PanacheRepository<CustomerDBO> {
 
     public List<Customer> getAll(Integer page, Integer size);
 
-    public List<Customer> getById(Customer customer, Integer page, Integer size);
+    public Customer getById(Customer customer);
 
-    public Customer createCustomer(Customer customer);
+    public Customer createCustomer(Customer customer) throws IllegalAccessException;
 
     public void updateCustomer(Customer customer);
 

@@ -6,9 +6,9 @@ public class ProductName {
 
     private String product;
 
-    public ProductName(String product) throws IllegalAccessException {
+    public ProductName(String product) throws IllegalArgumentException {
         if (Objects.isNull(product) || product.isBlank())
-            throw new IllegalAccessException("Invalid product name");
+            throw new IllegalArgumentException("Invalid product name");
 
         this.product = product;
     }
@@ -17,9 +17,9 @@ public class ProductName {
         return product;
     }
 
-    public void update(String product) throws IllegalAccessException {
+    public void update(String product) throws IllegalArgumentException {
         if (Objects.isNull(product) || product.isBlank())
-            throw new IllegalAccessException("Invalid product name");
+            throw new IllegalArgumentException("Invalid product name");
 
         this.product = product;
     }

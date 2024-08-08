@@ -10,7 +10,7 @@ public class CustomerEmail {
 
     private String email;
 
-    public CustomerEmail(String email) {
+    public CustomerEmail(String email) throws IllegalArgumentException {
         checkEmail(email);
 
         this.email = email;
@@ -26,7 +26,7 @@ public class CustomerEmail {
         this.email = email;
     }
 
-    private static void checkEmail(String email) {
+    private void checkEmail(String email) throws IllegalArgumentException {
         if (Objects.isNull(email) || email.isBlank())
             throw new IllegalArgumentException("Customer name cannot be null or blank");
 

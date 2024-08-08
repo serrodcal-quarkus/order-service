@@ -14,10 +14,12 @@ public class Order {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public Order(Long id, String product, Integer quantity) throws IllegalAccessException {
+    public Order(Long id, String product, Integer quantity, LocalDateTime createdAt, LocalDateTime updatedAt) throws IllegalArgumentException {
         this.id = id;
         this.product = new ProductName(product);
         this.quantity = new ProductQuantity(quantity);
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     public Long getId() {
