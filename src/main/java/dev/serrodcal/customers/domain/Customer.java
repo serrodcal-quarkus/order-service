@@ -7,6 +7,7 @@ import dev.serrodcal.orders.domain.Order;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -26,6 +27,17 @@ public class Customer {
         this.orders = new ArrayList<>(orders);
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+    }
+
+    public static Customer of(Long id) {
+        return new Customer(
+                id,
+                "someName",
+                "email@email.com",
+                new ArrayList<>(),
+                null,
+                null
+        );
     }
 
     public Long getId() {

@@ -22,6 +22,10 @@ public class Order {
         this.updatedAt = updatedAt;
     }
 
+    public static Order of(Long id) {
+        return new Order(id, "someProduct", 1, null, null);
+    }
+
     public Long getId() {
         return id;
     }
@@ -40,6 +44,10 @@ public class Order {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public void updateProduct(String product) throws IllegalAccessException {

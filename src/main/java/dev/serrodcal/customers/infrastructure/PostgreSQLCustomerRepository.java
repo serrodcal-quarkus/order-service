@@ -90,6 +90,10 @@ public class PostgreSQLCustomerRepository implements CustomerRepository {
     public void updateCustomer(Customer customer) {
         Objects.requireNonNull(customer, "Customer cannot be null");
 
+        CustomerDBO dbo = findById(customer.getId());
+        if (Objects.isNull(dbo))
+            throw new NoSuchElementException("There are no customer for that id");
+
         update(
                 "name = :name, email = :email where id = :id",
                 Parameters.with("name", customer.getName())

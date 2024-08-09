@@ -2,6 +2,7 @@ package dev.serrodcal.orders.application;
 
 import dev.serrodcal.orders.domain.Order;
 import dev.serrodcal.orders.domain.OrderRepository;
+import dev.serrodcal.orders.shared.mappers.OrderMapper;
 import dev.serrodcal.shared.infrastructure.dtos.PaginatedQuery;
 import dev.serrodcal.orders.application.dtos.OrderDTO;
 import dev.serrodcal.shared.application.dtos.Metadata;
@@ -22,11 +23,14 @@ public class OrderService {
     @Inject
     OrderRepository orderRepository;
 
+    @Inject
+    OrderMapper mapper;
+
     @CircuitBreaker(requestVolumeThreshold = 4)
     @SessionScoped
     public PaginatedDTO<List<OrderDTO>> getAll(PaginatedQuery query) {
         List<OrderDTO> orders = this.orderRepository.getAll(query.page(), query.size()).stream()
-                .map(i -> new OrderDTO(i.getId(), i.getProduct(), i.getQuantity(), i.getCreatedAt(), i.getUpdatedAt()))
+                .map(i -> this.mapper.mapOrderToOrderDTO(i))
                 .toList();
         return new PaginatedDTO<>(
             orders,
@@ -41,25 +45,20 @@ public class OrderService {
     @CircuitBreaker(requestVolumeThreshold = 4)
     @SessionScoped
     public OrderDTO getById(Long id) {
-        Order order = new Order(id, "someProduct", 1, null, null);
-        Order result = this.orderRepository.getById(order);
+        Order order = Order.of(id);
+        order = this.orderRepository.getById(order);
 
-        if (Objects.isNull(result))
+        if (Objects.isNull(order))
             throw new NoSuchElementException("Order id does not exist");
 
-        return new OrderDTO(
-                result.getId(),
-                result.getProduct(),
-                result.getQuantity(),
-                result.getCreatedAt(),
-                result.getUpdatedAt()
-        );
+        return this.mapper.mapOrderToOrderDTO(order);
     }
 
     @CircuitBreaker(requestVolumeThreshold = 4)
     @Transactional
     public void update(Long id, OrderDTO orderDTO) {
-        Order order = new Order(id, orderDTO.product(), orderDTO.quantity(), null, null);
+        Order order = this.mapper.mapOrderDTOToOrder(orderDTO);
+        order.setId(id);
 
         this.orderRepository.updateOrder(order);
     }

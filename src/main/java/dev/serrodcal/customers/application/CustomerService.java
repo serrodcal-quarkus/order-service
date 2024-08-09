@@ -5,6 +5,7 @@ import dev.serrodcal.customers.application.dtos.CustomerDTO;
 import dev.serrodcal.customers.application.dtos.NewCustomerCommand;
 import dev.serrodcal.customers.application.dtos.UpdateCustomerCommand;
 import dev.serrodcal.customers.domain.Customer;
+import dev.serrodcal.customers.shared.mappers.CustomerMapper;
 import dev.serrodcal.orders.application.dtos.OrderDTO;
 import dev.serrodcal.orders.domain.Order;
 import dev.serrodcal.customers.domain.CustomerRepository;
@@ -25,6 +26,9 @@ public class CustomerService {
 
     @Inject
     CustomerRepository customerRepository;
+
+    @Inject
+    CustomerMapper mapper;
 
     @CircuitBreaker(requestVolumeThreshold = 4)
     @SessionScoped
@@ -52,48 +56,19 @@ public class CustomerService {
     @CircuitBreaker(requestVolumeThreshold = 4)
     @SessionScoped
     public CustomerDTO getById(Long id) {
-        Customer customer = new Customer(id, "someName", "email@email.com", new ArrayList<>(), null, null);
-        Customer result = this.customerRepository.getById(customer);
+        Customer customer = Customer.of(id);
+        customer = this.customerRepository.getById(customer);
 
-        return new CustomerDTO(
-                result.getId(),
-                result.getName(),
-                result.getEmail(),
-                result.getOrders().stream().map(i -> new OrderDTO(i.getId(), i.getProduct(), i.getQuantity(), i.getCreatedAt(), i.getUpdatedAt())).toList(),
-                result.getCreatedAt(),
-                result.getUpdatedAt()
-        );
+        return this.mapper.mapCustomerToCustomerDTO(customer);
     }
 
     @CircuitBreaker(requestVolumeThreshold = 4)
     @Transactional
     public CustomerDTO save(NewCustomerCommand newCustomerCommand) throws IllegalAccessException {
-        Customer customer = new Customer(null, newCustomerCommand.name(), newCustomerCommand.email(), new ArrayList<>(), null, null);
-        Customer result = this.customerRepository.createCustomer(customer);
+        Customer customer = this.mapper.mapNewCustomerCommandToCustomer(newCustomerCommand);
+        customer = this.customerRepository.createCustomer(customer);
 
-        return new CustomerDTO(
-                result.getId(),
-                result.getName(),
-                result.getEmail(),
-                result.getOrders().stream().map(i -> new OrderDTO(i.getId(), i.getProduct(), i.getQuantity(), i.getCreatedAt(), i.getUpdatedAt())).toList(),
-                result.getCreatedAt(),
-                result.getUpdatedAt()
-        );
-//        CustomerDBO customerDBO = new CustomerDBO();
-//        customerDBO.name = newCustomerCommand.name();
-//        customerDBO.email = newCustomerCommand.email();
-//
-//        this.customerRepository.persistAndFlush(customerDBO);
-//        CustomerDBO result = this.customerRepository.findById(customerDBO.id);
-//
-//        return new CustomerDTO(
-//                result.id,
-//                result.name,
-//                result.email,
-//                result.orderDBOS.stream().map(i -> new OrderDTO(i.id, i.product, i.quantity, i.metadata.createdAt, i.metadata.updatedAt)).toList(),
-//                result.metadata.createdAt,
-//                result.metadata.updatedAt
-//        );
+        return this.mapper.mapCustomerToCustomerDTO(customer);
     }
 
     @CircuitBreaker(requestVolumeThreshold = 4)
@@ -107,7 +82,7 @@ public class CustomerService {
     @CircuitBreaker(requestVolumeThreshold = 4)
     @Transactional
     public void deleteById(Long id) {
-        Customer customer = new Customer(id, "someName", "email@email.com", new ArrayList<>(), null, null);
+        Customer customer = Customer.of(id);
         this.customerRepository.deleteCustomer(customer);
     }
 

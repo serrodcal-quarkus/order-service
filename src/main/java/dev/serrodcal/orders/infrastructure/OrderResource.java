@@ -1,6 +1,7 @@
 package dev.serrodcal.orders.infrastructure;
 
 import dev.serrodcal.orders.infrastructure.dtos.UpdateOrderRequest;
+import dev.serrodcal.orders.shared.mappers.OrderMapper;
 import dev.serrodcal.shared.infrastructure.dtos.PaginatedQuery;
 import dev.serrodcal.orders.infrastructure.dtos.OrderResponse;
 import dev.serrodcal.shared.infrastructure.dtos.Metadata;
@@ -30,6 +31,9 @@ public class OrderResource {
     @Inject
     OrderService orderService;
 
+    @Inject
+    OrderMapper mapper;
+
     @GET
     @Timeout(250)
     public PaginatedResponse<List<OrderResponse>> getAllOrders(
@@ -44,7 +48,7 @@ public class OrderResource {
         PaginatedDTO<List<OrderDTO>> paginatedDTO = this.orderService.getAll(new PaginatedQuery(page, size));
 
         List<OrderResponse> orders = paginatedDTO.dto().stream()
-                .map(i -> new OrderResponse(i.id(), i.product(), i.quantity(), i.createdAt(), i.updatedAt()))
+                .map(i -> this.mapper.mapOrderDTOToOrderResponse(i))
                 .toList();
 
         return new PaginatedResponse<>(
@@ -61,15 +65,8 @@ public class OrderResource {
     @Timeout(250)
     public OrderResponse getOrderById(@PathParam("id") Long id) {
         log.info("OrderResource.getOrderById()");
-        OrderDTO orderDTO = this.orderService.getById(id);
 
-        return new OrderResponse(
-                orderDTO.id(),
-                orderDTO.product(),
-                orderDTO.quantity(),
-                orderDTO.createdAt(),
-                orderDTO.updatedAt()
-        );
+        return this.mapper.mapOrderDTOToOrderResponse(this.orderService.getById(id));
     }
 
     @PUT
@@ -79,9 +76,7 @@ public class OrderResource {
         log.info("OrderResource.updateOrder()");
         log.debug(updateOrderRequest.toString());
 
-        System.out.println(updateOrderRequest.product());
-
-        this.orderService.update(id, new OrderDTO(null, updateOrderRequest.product(), updateOrderRequest.quantity(), null, null));
+        this.orderService.update(id, this.mapper.mapUpdateOrderRequestToOrderDTO(updateOrderRequest));
     }
 
 }

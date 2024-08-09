@@ -4,6 +4,7 @@ import dev.serrodcal.customers.application.dtos.AddOrderCommand;
 import dev.serrodcal.customers.application.dtos.CustomerDTO;
 import dev.serrodcal.customers.application.dtos.NewCustomerCommand;
 import dev.serrodcal.customers.application.dtos.UpdateCustomerCommand;
+import dev.serrodcal.customers.shared.mappers.CustomerMapper;
 import dev.serrodcal.shared.infrastructure.dtos.PaginatedQuery;
 import dev.serrodcal.customers.infrastructure.dtos.AddOrderRequest;
 import dev.serrodcal.customers.infrastructure.dtos.NewCustomerRequest;
@@ -38,6 +39,9 @@ public class CustomerResource {
     @Inject
     CustomerService customerService;
 
+    @Inject
+    CustomerMapper mapper;
+
     @GET
     @Timeout(250)
     public PaginatedResponse<List<CustomerResponse>> getAllCustomers(
@@ -52,14 +56,7 @@ public class CustomerResource {
         PaginatedDTO<List<CustomerDTO>> paginatedDTO = this.customerService.getAll(new PaginatedQuery(page, size));
 
         List<CustomerResponse> customers = paginatedDTO.dto().stream()
-                .map(i -> new CustomerResponse(
-                        i.id(),
-                        i.name(),
-                        i.email(),
-                        i.orders().stream().map(j -> new OrderResponse(j.id(), j.product(), j.quantity(), j.createdAt(), j.updatedAt())).toList(),
-                        i.createdAt(),
-                        i.updatedAt()
-                ))
+                .map(i -> this.mapper.mapCustomerDTOToCustomerResponse(i))
                 .toList();
 
         return new PaginatedResponse<>(
@@ -78,16 +75,7 @@ public class CustomerResource {
     public CustomerResponse getCustomerById(@PathParam("id") Long id) {
         log.info("CustomerResource.getCustomerById()");
 
-        CustomerDTO customerDTO = customerService.getById(id);
-
-        return new CustomerResponse(
-                customerDTO.id(),
-                customerDTO.name(),
-                customerDTO.email(),
-                customerDTO.orders().stream().map(i -> new OrderResponse(i.id(), i.product(), i.quantity(), i.createdAt(), i.updatedAt())).toList(),
-                customerDTO.createdAt(),
-                customerDTO.updatedAt()
-        );
+        return this.mapper.mapCustomerDTOToCustomerResponse(customerService.getById(id));
     }
 
     @POST
@@ -97,18 +85,10 @@ public class CustomerResource {
         log.info("CustomerResource.createCustomer()");
         log.debug(newCustomerRequest.toString());
 
-        CustomerDTO customerDTO = this.customerService.save(new NewCustomerCommand(
-                newCustomerRequest.name(),
-                newCustomerRequest.email()
-        ));
-
-        return new CustomerResponse(
-                customerDTO.id(),
-                customerDTO.name(),
-                customerDTO.email(),
-                customerDTO.orders().stream().map(i -> new OrderResponse(i.id(), i.product(), i.quantity(), i.createdAt(), i.updatedAt())).toList(),
-                customerDTO.createdAt(),
-                customerDTO.updatedAt()
+        return this.mapper.mapCustomerDTOToCustomerResponse(
+                this.customerService.save(
+                        this.mapper.mapNewCustomerRequestToNewCustomerCommand(newCustomerRequest)
+                )
         );
     }
 
@@ -119,10 +99,7 @@ public class CustomerResource {
         log.info("CustomerResource.updateCustomer()");
         log.debug(updateCustomerRequest.toString());
 
-        this.customerService.update(id, new UpdateCustomerCommand(
-                updateCustomerRequest.name(),
-                updateCustomerRequest.email()
-        ));
+        this.customerService.update(id, this.mapper.mapUpdateCustomerRequestToUpdateCustomerCommand(updateCustomerRequest));
     }
 
     @DELETE
@@ -143,12 +120,7 @@ public class CustomerResource {
         log.info("CustomerResource.addOrder()");
         log.debug(addOrderRequest.toString());
 
-        AddOrderCommand addOrderCommand = new AddOrderCommand(
-                addOrderRequest.product(),
-                addOrderRequest.quantity()
-        );
-
-        this.customerService.addOrder(customerId, addOrderCommand);
+        this.customerService.addOrder(customerId, this.mapper.mapAddOrderRequestToAddOrderCommand(addOrderRequest));
     }
 
     @DELETE
