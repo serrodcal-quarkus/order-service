@@ -1,16 +1,12 @@
 package dev.serrodcal.customers.infrastructure;
 
-import dev.serrodcal.customers.application.dtos.AddOrderCommand;
 import dev.serrodcal.customers.application.dtos.CustomerDTO;
-import dev.serrodcal.customers.application.dtos.NewCustomerCommand;
-import dev.serrodcal.customers.application.dtos.UpdateCustomerCommand;
 import dev.serrodcal.customers.shared.mappers.CustomerMapper;
 import dev.serrodcal.shared.infrastructure.dtos.PaginatedQuery;
 import dev.serrodcal.customers.infrastructure.dtos.AddOrderRequest;
 import dev.serrodcal.customers.infrastructure.dtos.NewCustomerRequest;
 import dev.serrodcal.customers.infrastructure.dtos.UpdateCustomerRequest;
 import dev.serrodcal.customers.infrastructure.dtos.CustomerResponse;
-import dev.serrodcal.orders.infrastructure.dtos.OrderResponse;
 import dev.serrodcal.shared.infrastructure.dtos.Metadata;
 import dev.serrodcal.shared.infrastructure.dtos.PaginatedResponse;
 import dev.serrodcal.shared.infrastructure.util.CheckParamUtil;

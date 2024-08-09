@@ -1,7 +1,5 @@
 package dev.serrodcal.orders.infrastructure;
 
-import dev.serrodcal.customers.domain.Customer;
-import dev.serrodcal.customers.infrastructure.CustomerDBO;
 import dev.serrodcal.orders.domain.Order;
 import dev.serrodcal.orders.domain.OrderRepository;
 import dev.serrodcal.orders.shared.mappers.OrderMapper;

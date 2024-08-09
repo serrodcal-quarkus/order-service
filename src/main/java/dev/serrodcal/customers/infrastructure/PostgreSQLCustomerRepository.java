@@ -1,9 +1,7 @@
 package dev.serrodcal.customers.infrastructure;
 
-import dev.serrodcal.customers.application.dtos.CustomerDTO;
 import dev.serrodcal.customers.domain.Customer;
 import dev.serrodcal.customers.domain.CustomerRepository;
-import dev.serrodcal.orders.application.dtos.OrderDTO;
 import dev.serrodcal.orders.domain.Order;
 import dev.serrodcal.orders.infrastructure.OrderDBO;
 import io.quarkus.panache.common.Page;
