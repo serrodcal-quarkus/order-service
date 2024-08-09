@@ -1,8 +1,8 @@
-package dev.serrodcal;
+package dev.serrodcal.customer.infrastructure;
 
 import io.quarkus.test.junit.QuarkusIntegrationTest;
 
 @QuarkusIntegrationTest
-class GreetingResourceIT extends GreetingResourceTest {
+class CustomerResourceIT extends CustomerResourceTest {
     // Execute the same tests but in packaged mode.
 }
